@@ -1,0 +1,44 @@
+{
+  "manifest_version": 2,
+  "name": "JiraHelper",
+  "version": "0.1",
+
+  // "browser_action": {
+  //   "default_icon": "icon.png",
+  //   "default_title": "JiraHelper",
+  //   "default_popup": "popup.html"
+  // },
+
+   "page_action": {
+      "default_icon": {                    // optional
+        "19": "icon.png",           // optional
+        "38": "icon.png"            // optional
+      },
+      "default_title": "JiraHelper"/*,      // optional; shown in tooltip
+      "default_popup": "popup.html"        // optional*/
+    },
+
+  "background": {
+    "scripts": ["js/bg.js"]
+  },
+
+  "permissions": [
+    "activeTab",
+    "contextMenus",
+    "declarativeContent",
+    "*://jira.corp/*"
+  ],
+
+  "content_scripts": [
+    {
+      "matches": ["*://jira.corp/*"],
+      "css": ["css/jira.css", "css/b64.css"],
+      "js": ["js/jquery-2.1.4.min.js", "js/content.js"]
+    },
+    {
+      "matches": ["*://admin.ac.corp/*"],
+      "css": ["css/admin.css"],
+      "js": ["js/jquery-2.1.4.min.js", "js/admin/content.js"]
+    }
+  ]
+}

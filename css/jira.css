@@ -1,0 +1,32 @@
+.git-branch-wrapper {
+	display: inline-block;
+    position: relative;
+    border: 1px solid #900;
+    border-radius: 3px;
+    padding: 1px 3px;
+    background-color: rgba(0,0,0,.1);
+    font-size: 12px;
+}
+
+.git-branch-wrapper .git-branch-copy {
+	position: absolute;
+	width: 15px;
+	height: 15px;
+	background-color: transparent;
+	background-position: center center;
+	background-size: cover;
+	border: none;
+	border-radius: 2px;
+	opacity: .5;
+
+	left: 100%;
+	margin-left: 5px;
+	top: 2px;
+	cursor: pointer;
+}
+.git-branch-wrapper .git-branch-copy:hover {
+	opacity: 1
+}
+.git-branch-wrapper .git-branch-copy.success {
+	outline: 1px solid green;
+}
