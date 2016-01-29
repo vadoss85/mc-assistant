@@ -35,3 +35,36 @@ $(function (argument) {
 		});
 	})
 })
+
+chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
+    console.log('onMessage')
+    if (message.type == 'editableArea.action') {
+		console.warn(message.message);
+		makeMarkupAction(message.message)
+    }
+});
+
+function makeMarkupAction(action) {
+	var node;
+
+	if (action.text) {
+		node = window.getSelection().baseNode;
+	};
+
+	if (!node.tagName || (node.tagName && node.tagName.toLowerCase() != 'textarea')) {
+		return;
+	};
+
+	node.value = _replaceStringWithMarkup(node, action.action);
+}
+
+function _replaceStringWithMarkup(node, markup) {
+	var result = node.value;
+	var text = node.value.substring(node.selectionStart, node.selectionEnd);
+
+	result = result.split(text);
+
+	r = [result[0], [markup[0], text, markup[1].join(''), result[1]]].join('');
+
+	return r
+}

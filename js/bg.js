@@ -18,10 +18,12 @@ var sections = {
 		title: "Text Effects",
 		actions: {
 			strong: {
-				title: '*strong* -> Makes text strong.'
+				title: '*strong* -> Makes text strong.',
+				action: ['*', '*']
 			},
 			emphasis: {
-				title: '_emphasis_ -> Makes text emphasis.'	
+				title: '_emphasis_ -> Makes text emphasis.',
+				action: ['_', '_']
 			}
 		}
 	},
@@ -49,17 +51,41 @@ for (var key in sections) {
 				"title": action.title, 
 				"parentId": key, 
 				"contexts":["editable", "selection"], 
-				"id": [key,key2].join('_')
+				"id": [key,key2].join('_'),
+				"onclick": function(info, tab) {
+					onActionClickHandler({
+						action: action.action,
+						tab: tab,
+						info: info
+					});
+				}
 			});
 		}
 	}
 }
 
-chrome.contextMenus.onClicked.addListener(onClickHandler);
+//chrome.contextMenus.onClicked.addListener(onClickHandler);
 
-function onClickHandler (info, tab) {
-	console.log(arguments)
+function onActionClickHandler (data) {
+	console.log(data.action)
+
+	sendMessage({
+		tabId: data.tab.id,
+		message: {
+			type: 'editableArea.action',
+			message: {
+				text: data.info.selectionText,
+				action: data.action	
+			}
+		}
+	})
 }
+
+function sendMessage(data, responseHandler) {
+	var responseHandler = responseHandler || function () {};
+	//chrome.runtime.sendMessage(msg, responseHandler);
+	chrome.tabs.sendMessage(data.tabId, data.message, responseHandler);
+};
 
  // Create a parent item and two children.
 /*  chrome.contextMenus.create({"title": "Test parent item", "id": "parent"});
