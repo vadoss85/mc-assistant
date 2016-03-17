@@ -26,12 +26,12 @@ $(function (argument) {
 					cpButton.addClass('success');
 
 					window.setTimeout(function () {
-						cpButton.removeClass('success');						
+						cpButton.removeClass('success');
 					}, 1500)
 				}
 			});
 
-			return;			
+			return;
 		});
 	})
 })
@@ -45,26 +45,42 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 });
 
 function makeMarkupAction(action) {
-	var node;
+	var sel = window.getSelection();
+	var text = sel.toString();
+	var txtarea = sel.focusNode;
+	var type = 'replace';
 
-	if (action.text) {
-		node = window.getSelection().baseNode;
-	};
+	if (txtarea.tagName.toLowerCase() != 'textarea') {
+		txtarea = document.querySelector('textarea', window.getSelection().focusNode)
+	}
 
-	if (!node.tagName || (node.tagName && node.tagName.toLowerCase() != 'textarea')) {
-		return;
-	};
+	if (action.action.length == 1) {
+		type = 'prepend';
+	}
 
-	node.value = _replaceStringWithMarkup(node, action.action);
+	_replaceStringWithMarkup(txtarea, text, {action: action.action, type: type});
 }
 
-function _replaceStringWithMarkup(node, markup) {
-	var result = node.value;
-	var text = node.value.substring(node.selectionStart, node.selectionEnd);
+function _replaceStringWithMarkup(node, str, action) {
+	var r;
+	var value = node.value;
+	var markup = action.action
 
-	result = result.split(text);
+	if (!value) {
+		console.warn('not a textarea');
 
-	r = [result[0], [markup[0], text, markup[1].join(''), result[1]]].join('');
+		return;
+	}
 
-	return r
+	switch (action.type) {
+		case 'replace':
+			r = [markup[0], str, markup[1]].join('');
+		break;
+
+		case 'prepend':
+			r = [markup[0], str]
+		break;
+	}
+
+	node.value = value.substring(0, node.selectionStart) + r + value.substring(node.selectionEnd, value.length)
 }

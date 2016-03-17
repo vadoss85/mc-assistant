@@ -12,21 +12,75 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     }
 });
 
+var colors = ['red', 'green', 'blue', 'yellow']
 
 var sections = {
 	"textEffects":{
 		title: "Text Effects",
-		actions: {
-			strong: {
+		actions: [
+			{
+				alias: 'strong',
 				title: '*strong* -> Makes text strong.',
 				action: ['*', '*']
 			},
-			emphasis: {
+			{
+				alias: 'emphasis',
 				title: '_emphasis_ -> Makes text emphasis.',
 				action: ['_', '_']
+			},
+			{
+				alias: 'citation',
+				title: '??citation?? -> Makes text in citation',
+				action: ['??', '??']
+			},
+			{
+				alias: 'deleted',
+				title: '-deleted- -> Makes text in citation',
+				action: ['-', '-']
+			},
+			{
+				alias: 'inserted',
+				title: '+inserted+ -> Makes text in citation',
+				action: ['+', '+']
+			},
+			{
+				alias: 'superscript',
+				title: '^superscript^ -> Makes text in citation',
+				action: ['^', '^']
+			},
+			{
+				alias: 'subscript',
+				title: '~subscript~ -> Makes text in citation',
+				action: ['~', '~']
+			},
+			{
+				alias: 'monospaced',
+				title: '{{monospaced}} -> Makes text in citation',
+				action: ['{{', '}}']
+			},
+			{
+				alias: 'bq',
+				title: '"bq. " -> Make an entire paragraph into a block quotation',
+				action: ['bq. ', '']
+			},
+			{
+				alias: 'quote',
+				title: '{quote} -> Quote a block of text that\'s longer than one paragraph.',
+				action: ['{quote}', '{quote}']
 			}
-		}
+		]
 	},
+	/*(+)	(-)	(?)	(on)	(off)	(*)	(*r)	(*g)	(*b)	(*y)*/
+	/*"notations": {
+		title: "Notations",
+		actions: [
+			{
+				alias: '+',
+				title: '(+)',
+				action: ['(+)']
+			}
+		]
+	}*/
 	// "headings":"Headings",
 	// "textBreaks":"Text Breaks",
 	// "links":"Links",
@@ -47,6 +101,7 @@ for (var key in sections) {
 	if (section.actions) {
 		for (var key2 in section.actions) {
 			var action = section.actions[key2];
+
 			chrome.contextMenus.create({
 				"title": action.title, 
 				"parentId": key, 
@@ -54,12 +109,35 @@ for (var key in sections) {
 				"id": [key,key2].join('_'),
 				"onclick": function(info, tab) {
 					onActionClickHandler({
-						action: action.action,
+						action: section.actions[info.menuItemId.split('_')[1]].action,
 						tab: tab,
 						info: info
 					});
 				}
 			});
+
+		};
+
+		if (key == 'textEffects') {
+			chrome.contextMenus.create({"title": 'Colorize', "parentId": key, "contexts":["editable", "selection"], "id": 'colorize'});
+			colors.forEach(function (color, i, arr) {
+				chrome.contextMenus.create({
+					"title": color, 
+					"parentId": 'colorize', 
+					"contexts":["editable", "selection"], 
+					"id": ['colorize',i].join('_'),
+					"onclick": function(info, tab) {
+						var i = colors[info.menuItemId.split('_')[1]];
+						var colorAction = ['{color:' + i + '}', '{color}'];
+
+						onActionClickHandler({
+							action: colorAction,
+							tab: tab,
+							info: info
+						});
+					}
+				});
+			})
 		}
 	}
 }
@@ -75,7 +153,7 @@ function onActionClickHandler (data) {
 			type: 'editableArea.action',
 			message: {
 				text: data.info.selectionText,
-				action: data.action	
+				action: data.action
 			}
 		}
 	})
